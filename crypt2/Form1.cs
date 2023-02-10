@@ -108,7 +108,7 @@ namespace crypt2
             int numberOfMatches = 0;
             for (int i = 0; i < file.Length / 8; i++)
             {
-                int amount = 1;
+                int amount = 0;
                 string currByte = file.Substring(i * 8, 8);
                 while (amount < 64 && i + 1 < file.Length / 8)
                 {
@@ -119,7 +119,7 @@ namespace crypt2
                     }
                     else
                     {
-                        numberOfMatches += amount - 1;
+                        numberOfMatches += amount;
                         break;
                     }
                 }
@@ -137,7 +137,7 @@ namespace crypt2
             int len = file.Length;
             for (int i = 0; i < file.Length; i++)
             {
-                amount = Convert.ToInt32(file.Substring(i + 2, 6), 2);
+                amount = Convert.ToInt32(file.Substring(i + 2, 6), 2)+1;
                 i += 8;
                 currByte = file.Substring(i, 8);
                 i += 7;
