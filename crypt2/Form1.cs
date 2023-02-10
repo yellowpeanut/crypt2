@@ -29,7 +29,10 @@ namespace crypt2
                 var fileStream = dialog.OpenFile();
                 fileContent = File.ReadAllText(dialog.FileName);
                 if (fileContent.Count() == 10000)
+                {
                     setPicture(pictureBox1, fileContent);
+                    label4.Text = $"Initial file size: {getFileSize(fileContent, 2)} bytes";
+                }
                 else
                 {
                     MessageBox.Show($"File does not contain 10000 symbols! (Symbol count - {fileContent.Count()})", "Error",
@@ -47,20 +50,39 @@ namespace crypt2
 
         private void button2_Click(object sender, EventArgs e)
         {
+            if (fileContent == String.Empty)
+            {
+                MessageBox.Show("Initial file is empty!", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             string compressedFile = compressFile(fileContent);
             richTextBox1.Text = compressedFile;
             File.WriteAllText("2.txt", compressedFile);
+            label6.Text = $"Compressed size: {getFileSize(compressedFile, 2)} bytes";
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
             string compressedFile = File.ReadAllText("2.txt");
+            if (compressedFile == String.Empty)
+            {
+                MessageBox.Show("Compressed file is empty!", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             string decompressedFile = decompressFile(compressedFile);
             File.WriteAllText("3.txt", decompressedFile);
             setPicture(pictureBox2, decompressedFile);
+            label5.Text = $"Decompressed size: {getFileSize(decompressedFile, 2)} bytes";
         }
 
-        private void setPicture(PictureBox pb, string file)
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+    private void setPicture(PictureBox pb, string file)
         {
             var bitmap = new Bitmap(100, 100);
             for (int x = 0; x < 100; x++)
@@ -97,7 +119,7 @@ namespace crypt2
                     }
                     else
                     {
-                        numberOfMatches += amount-1;
+                        numberOfMatches += amount - 1;
                         break;
                     }
                 }
@@ -147,6 +169,11 @@ namespace crypt2
                 text += rand.Next(0, 2).ToString();
             }
             File.WriteAllText("1.txt", text);
+        }
+
+        private int getFileSize(string file, int bitsPerSymbol)
+        {
+            return Convert.ToInt32(Math.Ceiling(Convert.ToDouble(file.Length * bitsPerSymbol) / 8.0));
         }
     }
 }
