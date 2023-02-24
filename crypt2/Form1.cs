@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace crypt2
 {
@@ -17,7 +18,8 @@ namespace crypt2
         public Form1()
         {
             InitializeComponent();
-            generatePicture(10000);
+            //generatePicture(10000);
+            generateNicePicture(10000);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -31,7 +33,7 @@ namespace crypt2
                 if (fileContent.Count() == 10000)
                 {
                     setPicture(pictureBox1, fileContent);
-                    label4.Text = $"Initial file size: {getFileSize(fileContent, 2)} bytes";
+                    label4.Text = $"Initial file size: {getFileSize(fileContent, 1)} bytes";
                 }
                 else
                 {
@@ -59,7 +61,7 @@ namespace crypt2
             string compressedFile = compressFile(fileContent);
             richTextBox1.Text = compressedFile;
             File.WriteAllText("2.txt", compressedFile);
-            label6.Text = $"Compressed size: {getFileSize(compressedFile, 2)} bytes";
+            label6.Text = $"Compressed size: {getFileSize(compressedFile, 1)} bytes";
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -74,7 +76,7 @@ namespace crypt2
             string decompressedFile = decompressFile(compressedFile);
             File.WriteAllText("3.txt", decompressedFile);
             setPicture(pictureBox2, decompressedFile);
-            label5.Text = $"Decompressed size: {getFileSize(decompressedFile, 2)} bytes";
+            label5.Text = $"Decompressed size: {getFileSize(decompressedFile, 1)} bytes";
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -85,17 +87,20 @@ namespace crypt2
     private void setPicture(PictureBox pb, string file)
         {
             var bitmap = new Bitmap(100, 100);
-            for (int x = 0; x < 100; x++)
+            for (int y = 0; y < 100; y++)
             {
-                for (int y = 0; y < 100; y++)
+                for (int x = 0; x < 100; x++)
                 {
-                    if (file[x * 100 + y] == '0')
+                    if (file[y * 100 + x] == '0')
                         bitmap.SetPixel(x, y, Color.White);
-                    else if (file[x * 100 + y] == '1')
+                    else if (file[y * 100 + x] == '1')
                         bitmap.SetPixel(x, y, Color.Black);
                     else
+                    {
                         MessageBox.Show("File contains unallowed symbols! Only symbols '1' and '0' are allowed", "Error",
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
                 }
             }
             pb.Image = bitmap;
@@ -106,16 +111,17 @@ namespace crypt2
         {
             string compressedFile = String.Empty;
             int numberOfMatches = 0;
-            for (int i = 0; i < file.Length / 8; i++)
+            for (int i = 0; i < file.Length; i++)
             {
                 int amount = 0;
-                string currByte = file.Substring(i * 8, 8);
-                while (amount < 64 && i + 1 < file.Length / 8)
+                string currByte = file.Substring(i, 8);
+                i += 8;
+                while (amount < 63 && i < file.Length)
                 {
-                    string nextByte = file.Substring((i + 1) * 8, 8);
+                    string nextByte = file.Substring(i, 8);
                     if (currByte == nextByte)
                     {
-                        i++; amount++;
+                        i += 8; amount++;
                     }
                     else
                     {
@@ -123,6 +129,7 @@ namespace crypt2
                         break;
                     }
                 }
+                i--;
                 string counter = "11" + Format(Convert.ToString(amount, 2));
                 compressedFile += (counter + currByte);
             }
@@ -138,8 +145,10 @@ namespace crypt2
             for (int i = 0; i < file.Length; i++)
             {
                 amount = Convert.ToInt32(file.Substring(i + 2, 6), 2)+1;
+                Debug.WriteLine($"{file.Substring(i + 2, 6)} - {amount}");
                 i += 8;
                 currByte = file.Substring(i, 8);
+                Debug.WriteLine($"{file.Substring(i, 8)} - {currByte}");
                 i += 7;
                 for (int j = 0; j < amount; j++)
                 {
@@ -167,6 +176,29 @@ namespace crypt2
             for (int i = 0; i < length; i++)
             {
                 text += rand.Next(0, 2).ToString();
+            }
+            File.WriteAllText("1.txt", text);
+        }
+
+        private void generateNicePicture(int length)
+        {
+            string text = String.Empty;
+            Random rand = new Random();
+            for (int i = 0; i < length / 4; i++)
+            {
+                text += "1";
+            }
+            for (int i = 0; i < length / 4; i++)
+            {
+                text += "0";
+            }
+            for (int i = 0; i < length / 4; i++)
+            {
+                text += "1";
+            }
+            for (int i = 0; i < length / 4; i++)
+            {
+                text += "0";
             }
             File.WriteAllText("1.txt", text);
         }
